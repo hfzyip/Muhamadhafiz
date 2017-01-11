@@ -1,0 +1,42 @@
+#Client.py
+
+import socket
+import RPi.GPIO as GPIO
+import time
+
+UDP_IP = "192.168.43.130"
+UDP_PORT = 5005
+
+led_pin = 13
+buzzer_pin= 15
+
+sock = socket.socket(socket.AF_INET, # Internet
+                     socket.SOCK_DGRAM) # UDP
+
+sock.bind((UDP_IP, UDP_PORT))
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(led_pin, GPIO.OUT) # LED pin
+GPIO.setup(buzzer_pin, GPIO.OUT) # Piezo pin
+buzzer = GPIO.PWM(buzzer_pin, 100)
+GPIO.output(buzzer_pin, GPIO.LOW)
+GPIO.output(led_pin, GPIO.LOW)
+
+try:
+
+        while True:
+                data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
+
+                print "KNOCK is detected! Please check your vehicle!"
+                if data == "1":
+                        GPIO.output(led_pin, GPIO.HIGH) # LED pin
+                        time.sleep(0.2)
+                        GPIO.output(buzzer_pin, GPIO.HIGH) # Piezo pine
+                else :
+                        GPIO.output(led_pin, GPIO.LOW) # LED pin
+                        time.sleep(0.2)
+                        GPIO.output(buzzer_pin, GPIO.LOW) # Piezo pine
+
+except KeyboardInterrupt:
+        GPIO.cleanup()
+        pwm.stop()

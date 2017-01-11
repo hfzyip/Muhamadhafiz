@@ -1,0 +1,52 @@
+import socket
+import RPi.GPIO as GPIO
+import time 
+
+KnockPin = 19
+buzzerpin = 13
+buzzer_status = 0
+
+UDP_IP = "192.168.43.130" 
+
+UDP_PORT = 5005 
+
+MESSAGE = "KNOCK DETECTED!!!!!!!" 
+
+def setup():
+        GPIO.setmode(GPIO.BOARD)      
+        GPIO.setup(KnockPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(buzzerpin, GPIO.OUT)
+        GPIO.output(buzzerpin, GPIO.LOW)
+
+def swLed(ev=None):
+        global buzzer
+        if buzzer_status:
+                buzzer="Buzzer is ON"
+        else:
+                buzzer="Buzzer is OFF"
+
+        GPIO.output(buzzerpin, GPIO.HIGH)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+        time.sleep(0.2)
+        GPIO.output(buzzerpin, GPIO.LOW)
+        print "UDP target IP:"  ,UDP_IP 
+        print "UDP target port:" ,UDP_PORT 
+        print "message:",MESSAGE
+        MESSAGE2="1"
+        sock.sendto(MESSAGE2,(UDP_IP, UDP_PORT))
+
+def loop():
+        GPIO.add_event_detect(KnockPin, GPIO.BOTH, callback=swLed, bouncetime=200) # wait for falling
+        while True:
+                pass   
+
+def destroy():     
+        GPIO.cleanup()                     # Release resource
+
+if __name__ == '__main__':     # Program start
+setup()
+        try:
+                loop()
+        except KeyboardInterrupt:  
+                destroy()
+
